@@ -6,6 +6,7 @@ const projectSchema = mongoose.Schema({
   title: String,
   description: String,
   amount: Number,
+  projectURL: String,
   audience: [],
 });
 

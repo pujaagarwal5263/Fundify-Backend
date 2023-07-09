@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv/config');
+const { Storage } = require('@google-cloud/storage');
 const Audience = require('./models/Audience');
 const Creator = require('./models/Creator');
 const Exclusive = require('./models/Exclusive');
@@ -17,6 +18,36 @@ const app = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+const storage = new Storage({
+  keyFilename: './google-cloud-creds.json',
+  projectId: 'jovial-pod-392309',
+});
+const bucketName = 'fundify';
+
+let currentEmail;
+
+const uploadToGoogleCloudStorage = (file, destination) => {
+  const bucket = storage.bucket(bucketName);
+  const fileName = `${destination}/${file.originalname}`;
+
+  const fileStream = bucket.file(fileName).createWriteStream({
+    resumable: false,
+    metadata: {
+      contentType: file.mimetype,
+    },
+  });
+
+  return new Promise((resolve, reject) => {
+    fileStream.on('error', reject);
+    fileStream.on('finish', () => {
+      const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+      resolve(publicUrl);
+    });
+
+    fileStream.end(file.buffer);
+  });
+};
 
 // // Get data from device
 // app.post('/data', (req, res) => {
@@ -52,9 +83,10 @@ app.post('/users/new', (req, res) => {
       category: req.body.category,
       email: req.body.email,
       password: req.body.password,
+      profileURL: "",
       description: req.body.description,
     });
-
+    currentEmail = req.body.email;
     Creator.create(creator, (err, creator) => {
       console.log(err);
       res.send(creator);
@@ -73,26 +105,49 @@ app.post('/users/new', (req, res) => {
   }
 });
 
+
 app.post('/upload/creator/profile/image/:pageName', (req, res) => {
   const pageName = req.params.pageName;
-  const storage = multer.diskStorage({
-    destination: './public/images/creators/' + pageName + '/profile',
-    filename: function (req, file, cb) {
-      cb(null, pageName + path.extname(file.originalname));
-    },
-  });
+  const upload = multer().single('profileImage');
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error('Error uploading file:', err);
+      return res.status(500).send("Error uploading file:");
+    }
 
-  const upload = multer({
-    storage: storage,
-  }).single('profileImage');
+    const file = req.file;
+    console.log("current email value",currentEmail)
+    if (!file) {
+      console.error('No file found in the request.');
+      return res.status(400).send("No file found in the request");
+    }
 
-  upload(req, res, (err) => {
-    console.log('Request file: ', req.file);
-    if (!err) return res.send(200);
+    try {
+      const destination = `creators/${pageName}/profile`;
+      const publicUrl = await uploadToGoogleCloudStorage(file, destination);
+      console.log('Uploaded to Google Cloud Storage:', publicUrl);
+      if(currentEmail){
+        Creator.updateOne(
+          { email: currentEmail }, // Filter the creator by email
+          { $set: { profileURL: publicUrl } } // Update the profileURL field
+        )
+          .then(() => {
+            console.log('Creator profileURL updated successfully.');
+          })
+          .catch((error) => {
+            console.error('Error updating creator profileURL:', error);
+          });
+      }
+      return res.status(200).send("Uploaded to Google Cloud Storage:");
+    } catch (error) {
+      console.error('Error uploading file to Google Cloud Storage:', error);
+      return res.status(500).send("Error uploading file to Google Cloud Storage");
+    }
   });
 });
 
 app.post('/users/login', (req, res) => {
+  currentEmail = req.body.email;
   if (req.body.userType === 'creator') {
     Creator.findOne({ email: req.body.email }).then((data) => res.send(data));
   } else {
@@ -107,6 +162,7 @@ app.post('/projects/new', (req, res) => {
     title: req.body.title,
     description: req.body.description,
     amount: req.body.amount,
+    projectURL:""
   });
 
   Project.create(project, (err, project) => {
@@ -117,25 +173,49 @@ app.post('/projects/new', (req, res) => {
 
 app.post('/projects/upload/:pageName', (req, res) => {
   const pageName = req.params.pageName;
-  const storage = multer.diskStorage({
-    destination:
-      './public/images/creators/' +
-      pageName +
-      '/projects/' +
-      req.query.projectName,
-    filename: function (req, file, cb) {
-      cb(null, req.query.projectName + path.extname(file.originalname));
-    },
-  });
+  const upload = multer().single('projectImage');
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error('Error uploading file:', err);
+      return res.status(500).send("Error uploading file:");
+    }
 
-  const upload = multer({
-    storage: storage,
-  }).single('projectImage');
+    const file = req.file;
+    console.log("current email value",currentEmail)
+    if (!file) {
+      console.error('No file found in the request.');
+      return res.status(400).send("No file found in the request");
+    }
 
-  upload(req, res, (err) => {
-    console.log('Request: ', req.body);
-    console.log('Request file: ', req.file);
-    if (!err) return res.send(200);
+    try {
+      const destination = `creators/${pageName}/projects`;
+      const publicUrl = await uploadToGoogleCloudStorage(file, destination);
+      console.log('Uploaded to Google Cloud Storage:', publicUrl);
+      console.log("currentEmail",currentEmail)
+      if(currentEmail){
+        Project.updateOne(
+          {
+            email: currentEmail,
+            pageName: pageName
+          },
+          {
+            $set: {
+              projectURL: publicUrl
+            }
+          }
+        )
+          .then(() => {
+            console.log('Project projectURL updated successfully.');
+          })
+          .catch((error) => {
+            console.error('Error updating Project projectURL:', error);
+          });
+      }
+      return res.status(200).send("Uploaded to Google Cloud Storage:");
+    } catch (error) {
+      console.error('Error uploading file to Google Cloud Storage:', error);
+      return res.status(500).send("Error uploading file to Google Cloud Storage");
+    }
   });
 });
 
@@ -212,8 +292,15 @@ app.post('/creator/funds/projects', (req, res) => {
 });
 
 app.post('/creator/exclusive/view', (req, res) => {
-  Exclusive.find({ pageName: req.body.pageName }).then((data) =>
-    res.send(data)
+  console.log("input",req.body.pageName)
+  Exclusive.find({ pageName: req.body.pageName }).then((data) =>{
+  const dataArray = data;
+  let exclusiveURL;
+  if(!Array.isArray(dataArray)){
+    dataArray=[dataArray];
+  }
+  res.send(dataArray)
+}
   );
 });
 
@@ -223,6 +310,7 @@ app.post('/creator/exclusive/new', (req, res) => {
     pageName: req.body.pageName,
     title: req.body.title,
     description: req.body.description,
+    exclusiveURL: ""
   });
 
   Exclusive.create(exclusive, (err, exclusive) => {
@@ -233,22 +321,41 @@ app.post('/creator/exclusive/new', (req, res) => {
 
 app.post('/exclusive/upload/:pageName', (req, res) => {
   const pageName = req.params.pageName;
-  const storage = multer.diskStorage({
-    destination:
-      './public/file/creators/' + pageName + '/exclusive/' + req.query.title,
-    filename: function (req, file, cb) {
-      cb(null, req.query.title + path.extname(file.originalname));
-    },
-  });
+  const upload = multer().single('contentFile');
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error('Error uploading file:', err);
+      return res.status(500).send("Error uploading file:");
+    }
 
-  const upload = multer({
-    storage: storage,
-  }).single('contentFile');
+    const file = req.file;
+    console.log("current email value",currentEmail)
+    if (!file) {
+      console.error('No file found in the request.');
+      return res.status(400).send("No file found in the request");
+    }
 
-  upload(req, res, (err) => {
-    console.log('Request: ', req.body);
-    console.log('Request file: ', req.file);
-    if (!err) return res.send(200);
+    try {
+      const destination = `creators/${pageName}/exclusive/${req.query.title}`;
+      const publicUrl = await uploadToGoogleCloudStorage(file, destination);
+      console.log('Uploaded to Google Cloud Storage:', publicUrl);
+      if(currentEmail){
+        Exclusive.updateOne(
+          { email: currentEmail }, // Filter the creator by email
+          { $set: { exclusiveURL: publicUrl } } // Update the profileURL field
+        )
+          .then(() => {
+            console.log('Creator exclusiveURL updated successfully.');
+          })
+          .catch((error) => {
+            console.error('Error updating creator exclusiveURL:', error);
+          });
+      }
+      return res.status(200).send("Uploaded to Google Cloud Storage:");
+    } catch (error) {
+      console.error('Error uploading file to Google Cloud Storage:', error);
+      return res.status(500).send("Error uploading file to Google Cloud Storage");
+    }
   });
 });
 
@@ -275,6 +382,6 @@ mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true }, () => {
   console.log('Connected to database!');
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 
 app.listen(PORT);

@@ -5,6 +5,7 @@ const creatorSchema = mongoose.Schema({
   firstName: String,
   lastName: String,
   pageName: { type: String, required: true },
+  profileURL: String,
   category: String,
   description: String,
   email: String,

@@ -1,0 +1,14 @@
+{
+    "type": "service_account",
+    "project_id": "jovial-pod-392309",
+    "private_key_id": "35b220cc6d5f71f0a62b14af290f70a493a56a90",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCtkRKjWBJ6K9Wv\ne4yOr+LIP70yP8xPYWg83xokjwnRpgT5sYPtj3wWC408zruwxIY4po0MAqILNluR\n3BaaX95jMqPuRhDyklWwT7p1Rpka+I8DDpJdYn3JedQRaVd20Zz1VTzjpa5iszyJ\nbTuqqSOKhBNPSibtqXkuK6SgeqwTu8kjvfofQYt0QF9FzOw3NlPwepdCD3/dXeTm\nd0jEjQJ8vqcFMcyZVog5m/NvN3sEAKfXmXr2K9jtwTgS2FNAkCwS/4bCkMqbhi5T\n4aM5CXp3FRIahEe98yvv7xLgN75omjQQBK77b/7EQCxjQ197Of8zFYvxpaeo72tn\n0y8lA7GhAgMBAAECggEACepfxjUh2Rjn/D5yqTQjII2DoXtDkMVfzxpvw+boCLIT\nVrBteQTZcej3CKJG1rJjeJkLNcRwvXM9h/eq0ubnLYOXGeWm0jTJ8GidnlWKKaBJ\ni0Mp2WvnA7uSAeyisocHEHzuHZM5gyn6K1+yKO3AugkRkVYLI0irQ5f6r7BSZE4d\n4AM/UgWuHR72SXHjeVRTiAW9B3GPMh6l4W1C5pzz6tQoWA2G9tm2Xs4xmX1XxtXG\n00dKwPTsu5+6/h71rIhRYAYfAyzFZYZzpen/cNVeU2LpTD3C8z3TdFagc3TKwFou\nXkM/Vks0jxyrKBPqFmNAoxTe85a6mKyEhAvwADG+AQKBgQDnAxpYdouZsc3Fcn6T\nbcKDXuT+ml/SNh3BfOLFbKEJb5ugV8HloNUvAMDctyUxn1swaQFjtHPK9kWZLhKj\nQf7stHMzwkFlIwD64NX5kBXUE3cm7l9EabKEQ3oO8X7yU/pCYIJXjiEsiDYJx9bN\nF9hSvPmmr/aospFMeDkXgMQwNQKBgQDAV0NnUNjxkWq1se0woqDiUpdwXnvOOOb5\n1axJGHqRrn/M9CWThq5krIJyF1K/QuYsa3DXPV1ou43EPLUEir0muwbrhymdG9AP\nmGcxq+esWse3z8OzZbQptrU8Icg8aZ7wA6NTfhdg2GZsrP3tlMtQIX430syok2tw\n8tpc1EQBPQKBgQCvL0A0Y7mb1SVpnVj1rl+6xiS8Gw+dVyKbj3xdIPLCOBv5rXNC\nEwR3v4eCGXUgO2uou4itNrQ07yt6bWD+41ZR5MoULzTuYGwm1IgP2D9lc1mBcXVX\naRxShuUyHdsaI6r92Tge846eubDZG+393B5VKC/eQ0S3S6s6JVWOSDz/HQKBgFrp\npEl0VGayRk8Ff8hqRkNTqJMLhddu2/YhAiM2t9CeO3gjupMlqM6bH7lPvuP6ehNq\n4VZLghhb9mFYFHPGJCvnYRj4tTm2iLymW7iFuaak7hu6z5S/MM46tyVqDlxHzEFE\nZvGy+tfi0V7y0b93gjYo7qDyOZxAuhsUHxSbnF09AoGAVW6EsBpzse3AU9o280Nc\nJsz8126Vw6T7q5+/Fg0/rEoPdf23ZvzvSzhnZuCEDp8dOVnQ+hq06bzze8LotCl+\ny8vcLUJ3XCnmopomOx6R/VGVD1ajyKXqdC+M1wYVnbRNf5GbOti0NZSa1LDDvVha\n7DIG9v3qJEOYt154hw4BA6c=\n-----END PRIVATE KEY-----\n",
+    "client_email": "fundify@jovial-pod-392309.iam.gserviceaccount.com",
+    "client_id": "109709547566301326151",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/fundify%40jovial-pod-392309.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+  }
+  
