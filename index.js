@@ -146,13 +146,19 @@ app.post('/upload/creator/profile/image/:pageName', (req, res) => {
   });
 });
 
-app.post('/users/login', (req, res) => {
-  currentEmail = req.body.email;
-  if (req.body.userType === 'creator') {
-    Creator.findOne({ email: req.body.email }).then((data) => res.send(data));
-  } else {
-    Audience.findOne({ email: req.body.email }).then((data) => res.send(data));
+app.post('/users/login', async(req, res) => {
+  if (req.body.userType == 'creator'){
+    const creatorUser = await  Creator.findOne({ email: req.body.email });
+    if(creatorUser && req.body.password==creatorUser.password){
+      return res.status(200).send(creatorUser)
+    }
+  }else{
+    const audienceUser = await Audience.findOne({ email: req.body.email });
+    if(audienceUser && req.body.password==audienceUser.password){
+      return res.status(200).send(audienceUser);
+    }
   }
+    return res.status(201).send("USER NOT FOUND")
 });
 
 app.post('/projects/new', (req, res) => {
@@ -364,18 +370,25 @@ app.post('/audience/info', (req, res) => {
 });
 
 app.post('/creators/exclusive', async (req, res) => {
-  console.log(req.body.pageNames);
   let pageNames = req.body.pageNames;
+  const userEmail = req.body.userEmail;
   let creators = [];
 
-  pageNames.forEach(async (element, index) => {
-    let data = await Exclusive.find({ pageName: element });
-    creators.push(...data);
-    if (index === pageNames.length - 1) {
-      console.log(creators);
-      res.send(creators);
-    }
-  });
+  const audData = await Audience.find({email: userEmail})
+  const pageNamesArray = audData[0].creators.map(item => item.pageName);
+
+  const exclusiveData = await Exclusive.find({ pageName: { $in: pageNamesArray } });
+
+  // pageNames.forEach(async (element, index) => {
+  //   let data = await Exclusive.find({ pageName: element });
+  //   creators.push(...data);
+  //   if (index === pageNames.length - 1) {
+  //    // console.log(creators);
+  //    console.log(creators);
+  //     res.send(creators);
+  //   }
+  // });
+  res.send(exclusiveData)
 });
 
 mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true }, () => {
