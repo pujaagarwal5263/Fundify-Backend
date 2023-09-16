@@ -11,7 +11,7 @@ const path = require('path');
 const multer = require('multer');
 const Project = require('./models/Project');
 const { replaceOne } = require('./models/Audience');
-const async = require('async');
+const Razorpay = require("razorpay");
 
 const app = express();
 
@@ -73,6 +73,30 @@ const uploadToGoogleCloudStorage = (file, destination) => {
 // });
 
 app.use(express.static('public'));
+
+app.post("/orders", async (req, res) => {
+  try {
+    console.log(req.body.amount);
+      const instance = new Razorpay({
+          key_id: "rzp_test_XphPOSB4djGspx",
+          key_secret: "CCrxVo3coD3SKNM3a0Bbh2my",
+      });
+
+      const options = {
+          amount: req.body.amount, // amount in smallest currency unit
+          currency: "INR",
+        //  receipt: "receipt_order_74394",
+      };
+
+      const order = await instance.orders.create(options);
+
+      if (!order) return res.status(500).send("Some error occured");
+
+      res.json(order);
+  } catch (error) {
+      res.status(500).send(error);
+  }
+});
 
 app.post('/users/new', (req, res) => {
   if (req.body.userType === 'creator') {
