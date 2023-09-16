@@ -18,6 +18,7 @@
     "mongoose": "^6.11.2",
     "multer": "^1.4.4",
     "nodemon": "^2.0.22",
+    "razorpay": "^2.9.2",
     "skipper": "^0.9.3"
   }
 }
